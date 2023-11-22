@@ -65,6 +65,10 @@ input[type='text'] {
   border-radius: 20px;
 }
 
+input[type='text'][disabled] {
+  cursor: wait;
+}
+
 #image {
   flex: 1;
   background-image: url("/static/art.jpg");
