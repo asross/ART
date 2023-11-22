@@ -14,30 +14,34 @@ OPENAI_ASST_ID = os.environ['OPENAI_ASST_ID']
 app = Flask(__name__)
 
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
-thread = client.beta.threads.create()
 
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/messages', methods=['GET'])
-def get_messages():
+@app.route('/threads', methods=['POST'])
+def create_thread():
+    thread = client.beta.threads.create()
+    return thread.id
+
+@app.route('/messages/<thread_id>', methods=['GET'])
+def get_messages(thread_id):
     try:
-        messages = client.beta.threads.messages.list(thread_id=thread.id)
+        messages = client.beta.threads.messages.list(thread_id=thread_id)
         return jsonify([c.content[0].text.value for c in messages.data])
     except:
         return jsonify([])
 
-@app.route('/messages', methods=['POST'])
-def post_message():
+@app.route('/messages/<thread_id>', methods=['POST'])
+def post_message(thread_id):
     client.beta.threads.messages.create(
-        thread_id=thread.id,
+        thread_id=thread_id,
         role="user",
-        content=request.form['question']
+        content=request.json['message']
     )
 
     client.beta.threads.runs.create(
-      thread_id=thread.id,
+      thread_id=thread_id,
       assistant_id=OPENAI_ASST_ID
     )
 

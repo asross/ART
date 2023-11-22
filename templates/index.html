@@ -6,54 +6,71 @@
         <link rel="stylesheet" href="/static/style.css">
     </head>
     <body>
-        <div id="container">
-            <div id="image"></div>
-            <div id="chat">
-              <div id="messages">
-                <p>
-                  <span>
-                    &hellip;
-                  </span>
-                </p>
-              </div>
-              <form id='speak'>
-                  <input type="hidden" id="conversation_id" name="conversation_id" value="1"/>
-                  <input type="submit" hidden />
-                  <input type="text" name="question"/>
-              </form>
-            </div>
+      <div id="container">
+        <div id="image"></div>
+        <div id="chat">
+          <div id="messages">
+            <p><span>&hellip;</span></p>
+          </div>
+
+          <form id="message-form">
+            <input type="submit" hidden />
+            <input type="text" id="message-input"/>
+          </form>
         </div>
+      </div>
     </body>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
-        $(document).ready(() => {
-          const getMessages = () => {
-            fetch('/messages').then(resp => {
-              resp.json().then(messages => {
-                messages.push('Hello passenger, welcome to the Perihelion.');
-                messages.reverse();
-                $('#messages').html(
-                  messages.map(msg => {
-                    return `<p><span>${msg || '&hellip;'}</span></p>`;
-                  }).join("")
-                );
-              });
-            });
+        $(document).ready(async () => {
+          const $form = $("#message-form");
+          const $input = $("#message-input");
+          const q = new URLSearchParams(location.search);
+          let threadId = q.get('thread');
+          let messages = [];
+
+          if (!threadId) {
+            const threadResp = await fetch('/threads', { method: 'POST' });
+            threadId = await threadResp.text();
+            q.set('thread', threadId);
+            history.replaceState({}, '', `${location.pathname}?${q}`);
+          }
+          
+          const getMessages = async () => {
+            const msgResp = await fetch(`/messages/${threadId}`);
+            messages = await msgResp.json();
+            $input.prop('disabled', false);
+            messages.push('Hello passenger, welcome to the Perihelion.');
+            messages.reverse();
+            const elems = messages.map(msg => `<p><span>${msg || '&hellip;'}</span></p>`);
+            $('#messages').html(elems.join(""));
           };
 
-          setInterval(getMessages, 1000);
+          const awaitNewMessages = async (expectedNumMessages) => {
+            await getMessages();
+            const numMessages = messages.filter(msg => msg && msg.length > 0).length;
+            if (numMessages < expectedNumMessages) {
+              setTimeout(() => awaitNewMessages(expectedNumMessages), 1000);
+            }
+          }
 
-          $('#speak').submit(function(e){
-            e.preventDefault();
-            const data = $(this).serialize();
-            $.ajax({
-              type: 'POST',
-              url: '/messages',
-              data: data,
-              success: function(resp) {
-                console.log(resp);
-              }
-            });
+          awaitNewMessages();
+
+          $form.submit(async (event) => {
+            event.preventDefault();
+            const message = $input.val();
+            if (message.length) {
+              $input.val(''); 
+              $input.prop('disabled', true);
+              const expectedNumMessages = messages.length + 2;
+              await fetch(`/messages/${threadId}`, {
+                method: 'POST',
+                body: JSON.stringify({ message }),
+                headers: { 'Content-Type': 'application/json' }
+              });
+              $input.prop('disabled', false);
+              awaitNewMessages(expectedNumMessages);
+            }
           });
         });
     </script>
