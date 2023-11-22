@@ -17,9 +17,13 @@ body {
   background-color: black;
   color: #00FF00;
   flex: 1;
-  overflow-y: scroll;
   padding: 1em;
   position: relative;
+}
+
+#messages {
+  max-height: calc(100vh - 90px);
+  overflow-y: scroll;
 }
 
 #chat p:first-child {
@@ -29,7 +33,7 @@ body {
 #chat p span {
   display: inline-block;
   border: 1px solid;
-  border-radius: 2em;
+  border-radius: 20px;
   padding: 10px;
 }
 
@@ -54,9 +58,11 @@ body {
 }
 
 input[type='text'] {
-  width: 100%;
+  width: calc(100% - 20px);
+  padding: 10px;
   font-family: monospace;
-  height: 1.5em;
+  font-size: 1rem;
+  border-radius: 20px;
 }
 
 #image {

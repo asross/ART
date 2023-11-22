@@ -25,6 +25,7 @@
         $(document).ready(async () => {
           const $form = $("#message-form");
           const $input = $("#message-input");
+          const $messages = $("#messages");
           const q = new URLSearchParams(location.search);
           let threadId = q.get('thread');
           let messages = [];
@@ -39,18 +40,20 @@
           const getMessages = async () => {
             const msgResp = await fetch(`/messages/${threadId}`);
             messages = await msgResp.json();
-            $input.prop('disabled', false);
             messages.push('Hello passenger, welcome to the Perihelion.');
             messages.reverse();
             const elems = messages.map(msg => `<p><span>${msg || '&hellip;'}</span></p>`);
-            $('#messages').html(elems.join(""));
+            $messages.html(elems.join(""));
+            $messages[0].scrollTop = $messages[0].scrollHeight;
           };
+
+          const numMessages = () => messages.filter(msg => msg && msg.length > 0).length;
 
           const awaitNewMessages = async (expectedNumMessages) => {
             await getMessages();
-            const numMessages = messages.filter(msg => msg && msg.length > 0).length;
-            if (numMessages < expectedNumMessages) {
-              setTimeout(() => awaitNewMessages(expectedNumMessages), 1000);
+            while (numMessages() < expectedNumMessages) {
+              await new Promise(r => setTimeout(r, 1000));
+              await getMessages();
             }
           }
 
@@ -68,8 +71,8 @@
                 body: JSON.stringify({ message }),
                 headers: { 'Content-Type': 'application/json' }
               });
+              await awaitNewMessages(expectedNumMessages);
               $input.prop('disabled', false);
-              awaitNewMessages(expectedNumMessages);
             }
           });
         });
