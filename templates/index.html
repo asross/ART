@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Perihelion</title>
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <div id="container">
+            <div id="image"></div>
+            <div id="chat">
+              <div id="messages">
+                <p>
+                  <span>
+                    &hellip;
+                  </span>
+                </p>
+              </div>
+              <form id='speak'>
+                  <input type="hidden" id="conversation_id" name="conversation_id" value="1"/>
+                  <input type="submit" hidden />
+                  <input type="text" name="question"/>
+              </form>
+            </div>
+        </div>
+    </body>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script>
+        $(document).ready(() => {
+          const getMessages = () => {
+            fetch('/messages').then(resp => {
+              resp.json().then(messages => {
+                messages.push('Hello passenger, welcome to the Perihelion.');
+                messages.reverse();
+                $('#messages').html(
+                  messages.map(msg => {
+                    return `<p><span>${msg || '&hellip;'}</span></p>`;
+                  }).join("")
+                );
+              });
+            });
+          };
+
+          setInterval(getMessages, 1000);
+
+          $('#speak').submit(function(e){
+            e.preventDefault();
+            const data = $(this).serialize();
+            $.ajax({
+              type: 'POST',
+              url: '/messages',
+              data: data,
+              success: function(resp) {
+                console.log(resp);
+              }
+            });
+          });
+        });
+    </script>
+</html>

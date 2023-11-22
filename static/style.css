@@ -1,0 +1,67 @@
+body {
+  background-color: black;
+  color: white;
+  font-family: monospace;
+  font-size: 1.2em;
+  margin: 0;
+  padding: 0;
+}
+
+#container {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+}
+
+#chat {
+  background-color: black;
+  color: #00FF00;
+  flex: 1;
+  overflow-y: scroll;
+  padding: 1em;
+  position: relative;
+}
+
+#chat p:first-child {
+  margin-top: 0;
+}
+
+#chat p span {
+  display: inline-block;
+  border: 1px solid;
+  border-radius: 2em;
+  padding: 10px;
+}
+
+#chat p:nth-child(even) span {
+  border: 1px solid #2294fb;
+  background-color: #2294fb;
+  color: white;
+}
+
+#chat p:nth-child(odd) {
+  text-align: left;
+}
+
+#chat p:nth-child(even) {
+  text-align: right;
+}
+
+#chat form {
+  position: fixed;
+  bottom: 1em;
+  width: calc(50% - 1em);
+}
+
+input[type='text'] {
+  width: 100%;
+  font-family: monospace;
+  height: 1.5em;
+}
+
+#image {
+  flex: 1;
+  background-image: url("/static/art.jpg");
+  background-size: cover;
+  background-position: center;
+}
