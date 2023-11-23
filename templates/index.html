@@ -20,7 +20,7 @@
         <div id="image"></div>
         <div id="chat">
           <div id="messages">
-            <p><span>&hellip;</span></p>
+            <p><span><em class='loading'></em></span></p>
           </div>
 
           <form id="message-form">
@@ -67,7 +67,7 @@
           }
 
           const mungeMessage = msg => {
-            if (!msg) return '&hellip;';
+            if (!msg) return "<em class='loading'></em>";
             return msg.replace(/\[([^\]]+)\]\(([^\)]+)\)/, '<a target="_blank" href="$2">$1</a>');
           }
 

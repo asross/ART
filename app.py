@@ -14,7 +14,6 @@ OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 OPENAI_ASST_ID = os.environ['OPENAI_ASST_ID']
 USERNAME = os.environ.get('AUTH_USERNAME', 'user')
 PASSWORD = os.environ.get('AUTH_PASSWORD', 'pass')
-
 UBER_URL = os.environ['UBER_URL']
 FEED_URLS = [
     "https://www.youtube.com/watch?v=HqLu2QuyPPE", # albatross in New Zealand
@@ -26,6 +25,13 @@ FEED_URLS = [
     "https://www.youtube.com/watch?v=2EZsnPekrGw", # birds in Poland
     "https://www.youtube.com/watch?v=3AqwaU3iSLw", # birds in South Africa
 ]
+MEDIA_URLS = [
+    "https://www.youtube.com/watch?v=3-wzr74d7TI", # Darmok
+    "https://www.youtube.com/watch?v=kcVDvX5swzk", # Sex and the City
+    "https://www.youtube.com/watch?v=LhqcnRMLnyU", # Frasier
+    "https://www.youtube.com/watch?v=WLfAf8oHrMo", # Tim Robinson
+    "https://www.youtube.com/watch?v=F36njQ5lMoU", # Couples Therapy
+]
 
 client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
@@ -34,6 +40,10 @@ def output_for(call):
         args = json.loads(call.function.arguments)
         dnum = int(args.get('drone_number', '1')) % len(FEED_URLS)
         return FEED_URLS[dnum]
+    elif call.function.name == 'displayMedia':
+        args = json.loads(call.function.arguments)
+        mnum = int(args.get('media_number', '1')) % len(MEDIA_URLS)
+        return MEDIA_URLS[mnum]
     elif call.function.name == 'callShuttle':
         return UBER_URL
     else:
