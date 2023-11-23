@@ -20,7 +20,7 @@
         <div id="image"></div>
         <div id="chat">
           <div id="messages">
-            <p><span><em class='loading'></em></span></p>
+            <p><span><em class='loading' title='I am loading, human'></em></span></p>
           </div>
 
           <form id="message-form">
@@ -32,6 +32,15 @@
     </body>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
+        // A small bit of duplication
+        const MEDIA_URLS = [
+          "https://www.youtube.com/watch?v=3-wzr74d7TI",
+          "https://www.youtube.com/watch?v=kcVDvX5swzk",
+          "https://www.youtube.com/watch?v=LhqcnRMLnyU",
+          "https://www.youtube.com/watch?v=WLfAf8oHrMo",
+          "https://www.youtube.com/watch?v=F36njQ5lMoU",
+        ];
+
         $(document).ready(async () => {
           const $feedClose = $("#close-feed");
           const $feedFrame = $("#feed-overlay iframe");
@@ -48,6 +57,15 @@
               ev.preventDefault();
               const youtubeId = new URLSearchParams(new URL(href).search).get('v');
               $feedFrame.attr("src", `https://www.youtube.com/embed/${youtubeId}?autoplay=1`);
+
+              // A hack because the OpenAI API doesn't seem to save info re:
+              // which function was called
+              if (MEDIA_URLS.includes(href)) {
+                $feedWrapper.find('h3').text("Pirated Entertainment Feed");
+              } else {
+                $feedWrapper.find('h3').text("Perihelion Live Drone Footage");
+              }
+
               $feedWrapper.removeClass('hidden');
             }
           });
@@ -66,13 +84,13 @@
             history.replaceState({}, '', `${location.pathname}?${q}`);
           }
 
-          const mungeMessage = msg => {
-            if (!msg) return "<em class='loading'></em>";
+          const munge = msg => {
+            if (!msg) return "<em class='loading' title='I am loading, human'></em>";
             return msg.replace(/\[([^\]]+)\]\(([^\)]+)\)/, '<a target="_blank" href="$2">$1</a>');
           }
 
           const renderMessages = () => {
-            const elems = messages.map(msg => `<p><span>${mungeMessage(msg)}</span></p>`);
+            const elems = messages.map(m => `<p class="${m.speaker}"><span>${munge(m.message)}</span></p>`);
             $messages.html(elems.join(""));
             $messages[0].scrollTop = $messages[0].scrollHeight;
           }
@@ -80,7 +98,10 @@
           const getMessages = async () => {
             const msgResp = await fetch(`/threads/${threadId}`);
             messages = await msgResp.json();
-            messages.push('Hello passenger, welcome to the Perihelion.');
+            messages.push({
+              'speaker': 'assistant',
+              'message': 'Hello passenger, welcome to the Perihelion.'
+            });
             messages.reverse();
             renderMessages();
           };
@@ -104,8 +125,8 @@
             if (message.length) {
               $input.val(''); 
               $input.prop('disabled', true);
-              messages.push(message);
-              messages.push('');
+              messages.push({ 'speaker': 'user', message });
+              messages.push({ 'speaker': 'assistant', message: ''});
               renderMessages();
               const msgResp = await fetch(`/threads/${threadId}`, {
                 method: 'POST',

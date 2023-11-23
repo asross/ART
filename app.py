@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, jsonify
 from flask_httpauth import HTTPBasicAuth
 import openai
 import json
+import time
 import os
 
 try:
@@ -66,11 +67,20 @@ def create_thread():
     thread = client.beta.threads.create()
     return thread.id
 
+def message_json(msg):
+    return {
+        'message': msg.content[0].text.value,
+        'speaker': msg.role
+    }
+
 @app.route('/threads/<thread_id>', methods=['GET'])
 def get_thread_messages(thread_id):
     try:
         messages = client.beta.threads.messages.list(thread_id=thread_id)
-        return jsonify([c.content[0].text.value for c in messages.data])
+        return jsonify([
+            { 'message': msg.content[0].text.value, 'speaker': msg.role }
+            for msg in messages.data
+        ])
     except:
         return jsonify([])
 
@@ -82,12 +92,17 @@ def post_thread_message(thread_id):
         content=request.json['message']
     )
 
-    run = client.beta.threads.runs.create(
-      thread_id=thread_id,
-      assistant_id=OPENAI_ASST_ID
-    )
+    # This seems to fail sporadically, and if it does, we end up in a bad state
+    for possible_retry in range(5):
+        try:
+            run = client.beta.threads.runs.create(
+              thread_id=thread_id,
+              assistant_id=OPENAI_ASST_ID
+            )
+            return run.id
+        except:
+            time.sleep(0.5)
 
-    return run.id
 
 @app.route('/threads/<thread_id>/runs/<run_id>', methods=['GET'])
 def poll_run(thread_id, run_id):
