@@ -38,8 +38,8 @@
           const $feedOverlay = $("#feed-overlay");
           const $feedWrapper = $("#feed-overlay-wrapper");
           $feedOverlay.click(ev => { ev.stopPropagation(); });
-          $feedWrapper.click(() => { $feedWrapper.addClass('hidden'); });
-          $feedClose.click(() => { $feedWrapper.addClass('hidden'); });
+          $feedWrapper.click(() => { $feedFrame.attr('src', ''); $feedWrapper.addClass('hidden'); });
+          $feedClose.click(() => { $feedFrame.attr('src', ''); $feedWrapper.addClass('hidden'); });
 
           $(document).on('click', 'a', ev => {
             const $link = $(ev.currentTarget);

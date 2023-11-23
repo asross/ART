@@ -1,4 +1,5 @@
 from flask import Flask, render_template, request, jsonify
+from flask_httpauth import HTTPBasicAuth
 import openai
 import json
 import os
@@ -11,12 +12,22 @@ except:
 
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 OPENAI_ASST_ID = os.environ['OPENAI_ASST_ID']
+USERNAME = os.environ.get('AUTH_USERNAME', 'user')
+PASSWORD = os.environ.get('AUTH_PASSWORD', 'pass')
+
 UBER_URL = os.environ['UBER_URL']
 FEED_URLS = [
-    "https://www.youtube.com/watch?v=x10vL6_47Dw",
-    "https://www.youtube.com/watch?v=IQiid4VGW9k",
-    "https://www.youtube.com/watch?v=4teJen3bjyM"
+    "https://www.youtube.com/watch?v=HqLu2QuyPPE", # albatross in New Zealand
+    "https://www.youtube.com/watch?v=4teJen3bjyM", # hummingbirds in Peru
+    "https://www.youtube.com/watch?v=x10vL6_47Dw", # birds in NY
+    "https://www.youtube.com/watch?v=IQiid4VGW9k", # birds in Canada
+    "https://www.youtube.com/watch?v=pXe8MpU7uzk", # hummingbirds in California
+    "https://www.youtube.com/watch?v=t-gxzu9GdWI", # birds in UK
+    "https://www.youtube.com/watch?v=2EZsnPekrGw", # birds in Poland
+    "https://www.youtube.com/watch?v=3AqwaU3iSLw", # birds in South Africa
 ]
+
+client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 def output_for(call):
     if call.function.name == 'displayDroneFeed':
@@ -29,10 +40,14 @@ def output_for(call):
         raise ArgumentError(f"Unknown function {call.function}")
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
 
-client = openai.OpenAI(api_key=OPENAI_API_KEY)
+@auth.verify_password
+def verify_password(username, password):
+    return username == USERNAME and password == PASSWORD
 
 @app.route('/')
+@auth.login_required
 def index():
     return render_template('index.html')
 

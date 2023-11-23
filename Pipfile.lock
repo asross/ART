@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "369f49c2297d0411ea9a1a1ab82a8e13ef56f88a1a96f86e17e841f5b44fe4b8"
+            "sha256": "43aa3b5facc3ead266cb09d030e52087d121299d41fda6f92fcda1b53d0aaed9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -72,6 +72,14 @@
             "index": "pypi",
             "markers": "python_version >= '3.8'",
             "version": "==3.0.0"
+        },
+        "flask-httpauth": {
+            "hashes": [
+                "sha256:66568a05bc73942c65f1e2201ae746295816dc009edd84b482c44c758d75097a",
+                "sha256:a58fedd09989b9975448eef04806b096a3964a7feeebc0a78831ff55685b62b0"
+            ],
+            "index": "pypi",
+            "version": "==4.8.0"
         },
         "gunicorn": {
             "hashes": [
@@ -198,12 +206,12 @@
         },
         "openai": {
             "hashes": [
-                "sha256:9fd7a8d9efbff4c35b4026266432e49372ca0da653a5d12dac3e4330f7e29b88",
-                "sha256:a8daed9553bbfc9e6d6a74615a2d48e4ff293d74d51f75b45ff18a9edbe61ce3"
+                "sha256:163e7ece4af76e961f58b75ea20a42b0d0c2a240c2f81b41a3d1c5962463cdf8",
+                "sha256:9437458978fb502e61336c3082e02b09c49feebe0e8516a2b8fb4563e6e4af4e"
             ],
             "index": "pypi",
             "markers": "python_full_version >= '3.7.1'",
-            "version": "==1.3.4"
+            "version": "==1.3.5"
         },
         "packaging": {
             "hashes": [
@@ -843,11 +851,11 @@
         },
         "jupyter-server": {
             "hashes": [
-                "sha256:78c97ec8049f9062f0151725bc8a1364dfed716646a66819095e0e8a24793eba",
-                "sha256:c9bd6e6d71dc5a2a25df167dc323422997f14682b008bfecb5d7920a55020ea7"
+                "sha256:20519e355d951fc5e1b6ac5952854fe7620d0cfb56588fa4efe362a758977ed3",
+                "sha256:e6da2657a954a7879eed28cc08e0817b01ffd81d7eab8634660397b55f926472"
             ],
             "markers": "python_version >= '3.8'",
-            "version": "==2.11.0"
+            "version": "==2.10.1"
         },
         "jupyter-server-terminals": {
             "hashes": [
