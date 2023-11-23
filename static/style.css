@@ -75,3 +75,74 @@ input[type='text'][disabled] {
   background-size: cover;
   background-position: center;
 }
+
+#feed-overlay-bg {
+  position: absolute;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.5);
+  z-index: 1;
+}
+
+.hidden {
+  display: none;
+}
+
+#feed-overlay {
+  position: absolute;
+  width: 1000px;
+  height: 563px;
+  z-index: 1;
+  overflow: hidden;
+  bottom: calc(50% - 231.5px);
+  left: calc(50% - 500px);
+  border: 5px solid black;
+  border-radius: 20px;
+  background: black;
+}
+
+#feed-overlay small {
+  position: absolute;
+  bottom: 0;
+  right: 10px;
+  font-size: 8px;
+  color: #666;
+}
+
+#feed-overlay small a {
+  color: #666;
+}
+
+#feed-overlay iframe {
+  position: absolute;
+  /*transform: perspective(48cm) rotateX(9deg) rotateY(36deg) rotateZ(3deg) translate(11em, 8em) scale(1.33);
+  transform-origin: 32em 15em;*/
+   transform: perspective(3.2cm) rotateY(7.1deg) translate(13em, 13em) scale(1.55);
+   transform-origin: 10em 31em;
+}
+
+#feed-overlay img {
+  position: absolute;
+  pointer-events: none;
+  width: 100%;
+}
+
+#feed-overlay h3 {
+  position: absolute;
+  z-index: 1;
+  color: #00ff00;
+  transform: perspective(3.5cm) rotateY(6.1deg) translate(29em, 16em) scale(1.55);
+  transform-origin: 10em 31em;
+  pointer-events: none;
+}
+
+#close-feed {
+    position: absolute;
+    z-index: 1;
+    color: black;
+    right: 1rem;
+    top: 0.5rem;
+    font-size: 32px;
+    text-decoration: none;
+    font-weight: bold;
+}

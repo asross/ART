@@ -6,6 +6,16 @@
         <link rel="stylesheet" href="/static/style.css">
     </head>
     <body>
+      <div id="feed-overlay-wrapper" class="hidden">
+        <div id="feed-overlay-bg"></div>
+        <div id="feed-overlay">
+          <h3>Perihelion Live Drone Footage</h3>
+          <a href='javascript:void(0)' id="close-feed">×</a>
+          <iframe width="560" height="315" src="https://www.youtube.com/embed/x10vL6_47Dw?autoplay=1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+          <img src="/static/sanctuary_moon.png">
+          <small>Credit: <a href="https://www.katiecoulas.com">Katie Coulas</a></small>
+        </div>
+      </div>
       <div id="container">
         <div id="image"></div>
         <div id="chat">
@@ -23,6 +33,25 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script>
         $(document).ready(async () => {
+          const $feedClose = $("#close-feed");
+          const $feedFrame = $("#feed-overlay iframe");
+          const $feedOverlay = $("#feed-overlay");
+          const $feedWrapper = $("#feed-overlay-wrapper");
+          $feedOverlay.click(ev => { ev.stopPropagation(); });
+          $feedWrapper.click(() => { $feedWrapper.addClass('hidden'); });
+          $feedClose.click(() => { $feedWrapper.addClass('hidden'); });
+
+          $(document).on('click', 'a', ev => {
+            const $link = $(ev.currentTarget);
+            const href = $link.attr('href');
+            if (href.includes('youtube')) {
+              ev.preventDefault();
+              const youtubeId = new URLSearchParams(new URL(href).search).get('v');
+              $feedFrame.attr("src", `https://www.youtube.com/embed/${youtubeId}?autoplay=1`);
+              $feedWrapper.removeClass('hidden');
+            }
+          });
+
           const $form = $("#message-form");
           const $input = $("#message-input");
           const $messages = $("#messages");
@@ -36,28 +65,38 @@
             q.set('thread', threadId);
             history.replaceState({}, '', `${location.pathname}?${q}`);
           }
+
+          const mungeMessage = msg => {
+            if (!msg) return '&hellip;';
+            return msg.replace(/\[([^\]]+)\]\(([^\)]+)\)/, '<a target="_blank" href="$2">$1</a>');
+          }
+
+          const renderMessages = () => {
+            const elems = messages.map(msg => `<p><span>${mungeMessage(msg)}</span></p>`);
+            $messages.html(elems.join(""));
+            $messages[0].scrollTop = $messages[0].scrollHeight;
+          }
           
           const getMessages = async () => {
-            const msgResp = await fetch(`/messages/${threadId}`);
+            const msgResp = await fetch(`/threads/${threadId}`);
             messages = await msgResp.json();
             messages.push('Hello passenger, welcome to the Perihelion.');
             messages.reverse();
-            const elems = messages.map(msg => `<p><span>${msg || '&hellip;'}</span></p>`);
-            $messages.html(elems.join(""));
-            $messages[0].scrollTop = $messages[0].scrollHeight;
+            renderMessages();
           };
 
-          const numMessages = () => messages.filter(msg => msg && msg.length > 0).length;
-
-          const awaitNewMessages = async (expectedNumMessages) => {
-            await getMessages();
-            while (numMessages() < expectedNumMessages) {
-              await new Promise(r => setTimeout(r, 1000));
-              await getMessages();
-            }
+          const fetchRunStatus = async (runId) => {
+            const runResp = await fetch(`/threads/${threadId}/runs/${runId}`);
+            const runStatus = await runResp.text();
+            return runStatus;
           }
 
-          awaitNewMessages();
+          const awaitRunCompletion = async (runId) => {
+            while (await fetchRunStatus(runId) !== 'completed') {
+              await new Promise(r => setTimeout(r, 1000));
+            }
+            await getMessages();
+          }
 
           $form.submit(async (event) => {
             event.preventDefault();
@@ -65,16 +104,21 @@
             if (message.length) {
               $input.val(''); 
               $input.prop('disabled', true);
-              const expectedNumMessages = messages.length + 2;
-              await fetch(`/messages/${threadId}`, {
+              messages.push(message);
+              messages.push('');
+              renderMessages();
+              const msgResp = await fetch(`/threads/${threadId}`, {
                 method: 'POST',
                 body: JSON.stringify({ message }),
                 headers: { 'Content-Type': 'application/json' }
               });
-              await awaitNewMessages(expectedNumMessages);
+              const runId = await msgResp.text();
+              await awaitRunCompletion(runId);
               $input.prop('disabled', false);
             }
           });
+
+          getMessages();
         });
     </script>
 </html>
